@@ -1,0 +1,14 @@
+piVersion: v1
+kind: Service
+metadata:
+  name: wordpress
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: wordpress
+    
