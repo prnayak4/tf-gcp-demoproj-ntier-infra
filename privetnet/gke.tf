@@ -24,7 +24,7 @@ project                 = var.ProjectID
 
   maintenance_policy {
     recurring_window {
-      start_time = "2023-02-18T00:00:00Z"
+      start_time = "2021-06-18T00:00:00Z"
       end_time   = "2050-01-01T04:00:00Z"
       recurrence = "FREQ=WEEKLY"
     }
