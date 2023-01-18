@@ -1,7 +1,7 @@
 resource "google_container_cluster" "private" {
 project                 = var.ProjectID
   provider                 = google-beta
-  name                     = "private"
+  name                     = "demogkeclust"
   location                 = var.region
 
   network                  = google_compute_network.custom.name

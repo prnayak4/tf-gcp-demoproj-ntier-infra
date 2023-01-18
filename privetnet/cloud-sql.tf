@@ -7,7 +7,7 @@ resource "random_string" "db_name_suffix" {
 resource "google_sql_database_instance" "mysql" {
  project                 = var.ProjectID
   # Instance info
-  name             = "mysql-private-${random_string.db_name_suffix.result}"
+  name             = "mysql-inst-${random_string.db_name_suffix.result}"
   region           = var.region
   database_version = var.mysql_database_version
 
