@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,7 +17,7 @@ spec:
         app: cloud-sql-proxy
     spec:
       serviceAccountName: cloud-sql-access
-      containers: 
+      containers:
         - name: cloud-sql-proxy
           image: gcr.io/cloudsql-docker/gce-proxy:1.23.0
           ports:
@@ -26,9 +27,9 @@ spec:
             - configMapRef:
                 name: cloud-sql-instance
           command:
-            - "/cloud_sql_proxy"
-            - "-ip_address_types=PRIVATE"
-            - "-instances=$(CLOUD_SQL_PROJECT_ID):$(CLOUD_SQL_INSTANCE_REGION):$(CLOUD_SQL_INSTANCE_NAME)=tcp:0.0.0.0:3306"
+            - /cloud_sql_proxy
+            - -ip_address_types=PRIVATE
+            - -instances=$(CLOUD_SQL_PROJECT_ID):$(CLOUD_SQL_INSTANCE_REGION):$(CLOUD_SQL_INSTANCE_NAME)=tcp:0.0.0.0:3306
           securityContext:
             runAsNonRoot: true
           resources:

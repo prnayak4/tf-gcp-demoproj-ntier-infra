@@ -3,7 +3,6 @@ project                 = var.ProjectID
   provider                 = google-beta
   name                     = "demogkeclust"
   location                 = var.region
-
   network                  = google_compute_network.custom.name
   subnetwork               = google_compute_subnetwork.web.id
 

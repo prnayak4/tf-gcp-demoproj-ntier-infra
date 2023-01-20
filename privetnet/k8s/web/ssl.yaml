@@ -1,0 +1,8 @@
+# https://cloud.google.com/kubernetes-engine/docs/how-to/managed-certs#config-connector
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: wordpress
+spec:
+  domains:
+    - <DOMAIN_NAME>

@@ -1,10 +1,15 @@
+# https://cloud.google.com/kubernetes-engine/docs/concepts/ingress
+# https://cloud.google.com/kubernetes-engine/docs/concepts/ingress-xlb
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
+  name: wordpress
   annotations:
     kubernetes.io/ingress.global-static-ip-name: "wordpress"
     kubernetes.io/ingress.class: "gce"
-  name: wordpress
+    networking.gke.io/managed-certificates: "wordpress"
+    # reference the FrontendConfig for HTTP -> HTTPS redirect
+    networking.gke.io/v1beta1.FrontendConfig: "wordpress"
 spec:
   defaultBackend:
     service:
@@ -14,7 +19,7 @@ spec:
   rules:
   - http:
       paths:
-      - path: /*
+      - path: /
         pathType: ImplementationSpecific
         backend:
           service:

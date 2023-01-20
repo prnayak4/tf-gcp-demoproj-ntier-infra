@@ -40,7 +40,7 @@ spec:
             initialDelaySeconds: 30
             httpGet:
               port: 80
-              path: /wp-admin/install.php # at the very beginning, this is the only accessible page. Don't forget to change to /wp-login.php 
+              path: /wp-admin/install.php
           readinessProbe:
             httpGet:
               port: 80
