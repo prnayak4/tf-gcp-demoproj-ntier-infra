@@ -7,7 +7,8 @@ EADME.md
   
   High Level Architecture 
   
-  ![gcp arch](https://user-images.githubusercontent.com/103103240/214035360-567379d9-64df-4901-8b9a-d04fe1bc47ac.png)
+  ![gcp arch](https://user-images.githubusercontent.com/103103240/214039131-6fac574c-d739-438f-8424-9017ffaf2fad.png)
+
 
 Purpose of this module 
 
