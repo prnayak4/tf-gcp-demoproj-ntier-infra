@@ -1,0 +1,187 @@
+_______________________________
+Create password for  mysql database 
+
+gcloud beta secrets create wordpress-admin-user-password --locations asia-southeast1 --replication-policy user-managed
+Created secret [wordpress-admin-user-password].
+
+echo -n "changeme" | gcloud beta secrets versions add wordpress-admin-user-password --data-file=-
+Created version [1] of the secret [wordpress-admin-user-password].
+
+_____________________________________________
+
+
+1:- gcloud auth login
+2:- gcloud config set project demoproject-374905
+3:- Connect to cluster :- Click on connect in portal and get the command to execute . 
+gcloud container clusters get-credentials demogkeclust --region europe-west1 --project demoproject-374905
+4:- Create Namespace :- kubectl create namespace wordpress
+    kubectl create -f service_account.yaml -n wordpress
+
+
+_______________________________
+pramodkumarnayak@cloudshell:~ (demoproject-374905)$ kubectl create -f service-account.yaml -n wordpress
+serviceaccount/cloud-sql-access created
+pramodkumarnayak@cloudshell:~ (demoproject-374905)$
+_____________________________________________
+
+5:- 
+Allow the Kubernetes service account to impersonate the created Google service account by an IAM policy binding between the two:
+
+gcloud iam service-accounts add-iam-policy-binding --role roles/iam.workloadIdentityUser --member "serviceAccount:demoproject-374905.svc.id.goog[wordpress/cloud-sql-access]" cloud-sql-access@demoproject-374905.iam.gserviceaccount.com
+
+___________________________________________________________
+pramodkumarnayak@cloudshell:~ (demoproject-374905)$ gcloud iam service-accounts add-iam-policy-binding --role roles/iam.workloadIdentityUser --member "serviceAccount:demoproject-374905.svc.id.goog[wordpress/cloud-sql-access]" cloud-sql-access@demoproject-374905.iam.gserviceaccount.com
+Updated IAM policy for serviceAccount [cloud-sql-access@demoproject-374905.iam.gserviceaccount.com].
+bindings:
+- members:
+  - serviceAccount:demoproject-374905.svc.id.goog[wordpress/cloud-sql-access]
+  role: roles/iam.workloadIdentityUser
+etag: BwXyq5DhYfE=
+version: 1
+pramodkumarnayak@cloudshell:~ (demoproject-374905)$
+_________________________________________________________________________
+
+6:- Cloud SQL Auth proxy to secure access to our Cloud SQL instance without the need for Authorized networks or for configuring SSL 
+
+data/deployment.yaml 
+
+pramodkumarnayak@cloudshell:~ (demoproject-374905)$ kubectl apply -f ./deployment.yaml
+deployment.apps/cloud-sql-proxy created
+pramodkumarnayak@cloudshell:~ (demoproject-374905)$
+
+__________________________________________________________________________________________
+
+
+7:- Cloud SQL instance details are retrieved from a Kubernetes config map
+
+pramodkumarnayak@cloudshell:~ (demoproject-374905)$ kubectl apply -f ./config-map.yaml
+configmap/cloud-sql-instance created
+pramodkumarnayak@cloudshell:~ (demoproject-374905)$
+
+_______________________________
+
+8:- expose the deployment resource using a Kubernetes service:
+
+pramodkumarnayak@cloudshell:~ (demoproject-374905)$ kubectl apply -f ./services.yaml
+service/cloud-sql-proxy created
+pramodkumarnayak@cloudshell:~ (demoproject-374905)$
+
+_____________________________________________
+
+9:- Let's create our resources and check if the connection is established:
+
+ kubectl create -f config-map.yaml -n wordpress
+ 
+pramodkumarnayak@cloudshell:~ (demoproject-374905)$  kubectl create -f config-map.yaml -n wordpress
+configmap/cloud-sql-instance created
+pramodkumarnayak@cloudshell:~ (demoproject-374905)$ pwd
+
+ 
+10:- resources and check   connection  
+
+
+ kubectl create -f ./data -n wordpress
+
+  kubectl get pods -l app=cloud-sql-proxy -n wordpress
+
+NAME                              READY   STATUS    RESTARTS   AGE
+cloud-sql-proxy-fb9968d49-hqlwb   1/1     Running   0          4s
+cloud-sql-proxy-fb9968d49-wj498   1/1     Running   0          5s
+cloud-sql-proxy-fb9968d49-z95zw   1/1     Running   0          4s
+
+  kubectl logs cloud-sql-proxy-fb9968d49-hqlwb -n wordpress
+  
+ 
+ WEB DEPLOYMENT FROM WEB directory :-
+ 
+ 1:-  kubectl apply -f deployment.yaml
+ 2:- kubectl apply -f service.yaml
+ 3:-kubectl apply -f volume-claim.yaml
+ 4:- allow us to access the Wordpress application from the internet. 
+
+kubectl apply -f ingress.yaml
+
+
+2:- 
+create  resources and test the Wordpress application:
+
+ 
+
+gcloud compute addresses create wordpress --global
+
+ kubectl create -f web -n wordpress
+
+  kubectl get pods -l app=wordpress -n wordpress
+
+NAME                         READY   STATUS    RESTARTS   AGE
+wordpress-6d58d85845-2d7x2   1/1     Running   0          10m
+
+  kubectl get ingress -n wordpress
+NAME        CLASS    HOSTS   ADDRESS         PORTS   AGE
+wordpress   <none>   *       34.117.187.51   80      16m
+
+
+BACKEND 
+
+create a backend config in Kubernetes and reference the security policy
+kubectl apply -f backend.yaml
+kubectl apply -f  /web/service.yaml -n wordpress
+
+
+TESTING :-
+1:- use a Bad IP to test 
+
+gcloud compute security-policies rules update 1000 \
+    --security-policy wordpress \
+    --src-ip-ranges "85.56.40.96"
+
+curl http://34.117.187.51/
+
+<!doctype html><meta charset="utf-8"><meta name=viewport content="width=device-width, initial-scale=1"><title>403</title>403 Forbidden
+
+
+2:- use a correct  IP to test
+
+
+gcloud compute security-policies rules update 1000 \
+    --security-policy wordpress \
+    --src-ip-ranges $(curl -s http://checkip.amazonaws.com/)
+
+curl http://34.117.187.51/
+<!doctype html>
+<html lang="en-GB" >
+<head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>admin &#8211; Just another WordPress site</title>
+
+
+
+  3:- Create a Kubernetes secret to wrap the OAuth client which was created earlier
+CLIENT_ID_KEY=<CLIENT_ID_KEY>
+CLIENT_SECRET_KEY=<CLIENT_SECRET_KEY>
+kubectl create secret generic wordpress --from-literal=client_id=$CLIENT_ID_KEY \
+    --from-literal=client_secret=$CLIENT_SECRET_KEY \
+    -n wordpress
+	
+	Lets update  backend 
+	
+	kubectl apply -f  web/backend-config.yaml -n wordpress
+	
+	
+	4:-  create the domain name using Terraform or   gcloud command or from Portal : 
+export PUBLIC_DNS_NAME=www.pramodtest.com
+export PUBLIC_DNS_ZONE_NAME=pramodzone 
+
+gcloud dns record-sets transaction start --zone=$PUBLIC_DNS_ZONE_NAME
+gcloud dns record-sets transaction add $(gcloud compute addresses list --filter=name=wordpress --format="value(ADDRESS)") --name=wordpress.$PUBLIC_DNS_NAME. --ttl=300 --type=A --zone=$PUBLIC_DNS_ZONE_NAME
+gcloud dns record-sets transaction execute --zone=$PUBLIC_DNS_ZONE_NAME
+
+ Change the domain name from ssl.yaml 
+
+kubectl create -f infra/k8s/web/ssl.yaml -n wordpress
+ 
+ Add the annotation networking.gke.io/managed-certificates: "wordpress" in your ingress resource.
+ 
+ TEST IT 
+ 
