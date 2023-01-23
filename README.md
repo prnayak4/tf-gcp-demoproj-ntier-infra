@@ -5,6 +5,10 @@ EADME.md
  Feature included like , private vpc , Defense in defth with private vpc and Cloud Armor,firewall setting wich allow only spefic network .Cloud NAT provides outgoing connectivity
  for privat gke , vm ,cloud run , cloud function , app engine .
   
+  High Level Architecture 
+  
+  ![gcp arch](https://user-images.githubusercontent.com/103103240/214035360-567379d9-64df-4901-8b9a-d04fe1bc47ac.png)
+
 Purpose of this module 
 
  A) With Terraform
